@@ -32,7 +32,16 @@ def put_bucket_object(bucket_name):
 #        print("Error accessing bucket : %s, got error code %s" % bucket_name, error_code)
 #        exit
 
-    s3.Object(bucket_name, "foo.txt").put(Body=open("./foo.txt", "rb"))
+    # Upload Object
+    #s3.Object(bucket_name, "foo.txt").put(Body=open("./foo.txt", "rb"))
+
+    # Copy Object over itself, setting CacheControl metadata
+    object_name = "foo.txt"
+    s3.Object( bucket_name, object_name).copy_from(
+        CopySource=bucket_name + "/" + object_name,
+        CacheControl="public, max-age=300",
+        MetadataDirective="REPLACE"
+        )
 
 parser = argparse.ArgumentParser()
 parser.add_argument("env", type=str, help="Environment name dev|stage|prod")
