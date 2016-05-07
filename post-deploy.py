@@ -35,13 +35,14 @@ def list_bucket_objects(bucket_name):
 def update_metadata_on_objects(bucket_name, objects):
     """ Update metadata on all objects in a bucket"""
 
-    bucket = s3.Bucket(bucket_name)
-
     # Copy Object over itself, setting CacheControl metadata
     for object_name in objects:
+
+        object_content_type = s3.Object(bucket_name, object_name.key).content_type
         s3.Object(bucket_name, object_name.key).copy_from(
             CopySource=bucket_name + "/" + object_name.key,
             CacheControl="public, max-age=300",
+            ContentType=object_content_type,
             MetadataDirective="REPLACE"
             )
 
