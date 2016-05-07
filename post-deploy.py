@@ -21,27 +21,29 @@ def get_bucket_name(env):
             return(bucket_name)
             break
 
-def put_bucket_object(bucket_name):
-    """ Put object into S3 bucket, using bucketname from env config file """
+def list_bucket_objects(bucket_name):
+    """ List all objects in a bucket"""
+
     bucket = s3.Bucket(bucket_name)
 
-#    try:
-#        s3.meta.client.head_bucket(Bucket=bucket)
-#    except botocore.exceptions.ClientError as resp:
-#        error_code = int(resp.error_code['Error']['Code'])
-#        print("Error accessing bucket : %s, got error code %s" % bucket_name, error_code)
-#        exit
+    objects = bucket.objects.all()
+    for object_name in objects:
+        print ("Object Name is : %s " % object_name.key)
 
-    # Upload Object
-    #s3.Object(bucket_name, "foo.txt").put(Body=open("./foo.txt", "rb"))
+    return objects
+
+def update_metadata_on_objects(bucket_name, objects):
+    """ Update metadata on all objects in a bucket"""
+
+    bucket = s3.Bucket(bucket_name)
 
     # Copy Object over itself, setting CacheControl metadata
-    object_name = "foo.txt"
-    s3.Object( bucket_name, object_name).copy_from(
-        CopySource=bucket_name + "/" + object_name,
-        CacheControl="public, max-age=300",
-        MetadataDirective="REPLACE"
-        )
+    for object_name in objects:
+        s3.Object(bucket_name, object_name.key).copy_from(
+            CopySource=bucket_name + "/" + object_name.key,
+            CacheControl="public, max-age=300",
+            MetadataDirective="REPLACE"
+            )
 
 parser = argparse.ArgumentParser()
 parser.add_argument("env", type=str, help="Environment name dev|stage|prod")
@@ -51,17 +53,13 @@ if args.env == "dev" or args.env == "stage" or args.env == "prod" :
     #print ("Env is " + args.env)
     bucket_name = get_bucket_name(args.env)
     s3 = boto3.resource('s3')
-    put_bucket_object(bucket_name)
+    objects = list_bucket_objects(bucket_name)
+    update_metadata_on_objects(bucket_name, objects)
+    #put_bucket_object(bucket_name)
+
 else:
     print ("Env has invalid value: " + args.env)
     parser.print_help()
-
-
-#s3 = boto3.resource('s3')
-#for bucket in s3.buckets.all():
-#    print(bucket.name)
-
-
 
 # print trailing crlf
 print("")
