@@ -16,6 +16,7 @@ def get_bucket_name(env):
         if "bucketName" in line:
             bucket_name = line.split("'")[1]
             print("Bucket Name is: %s" % bucket_name)
+            break
 
 parser = argparse.ArgumentParser()
 parser.add_argument("env", type=str, help="Environment name dev|stage|prod")
