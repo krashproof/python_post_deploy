@@ -12,14 +12,15 @@ def get_bucket_name(env):
     a value to bucketname
     """
 
-    filename = env + ".cfg"
+    config_file = env + ".cfg"
 
-    for line in open(filename):
+    for line in open(config_file):
         if "bucketName" in line:
             bucket_name = line.split("'")[1]
             print("Bucket Name is: %s" % bucket_name)
             return(bucket_name)
             break
+
 
 def list_bucket_objects(bucket_name):
     """ List all objects in a bucket"""
